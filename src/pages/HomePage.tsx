@@ -2,59 +2,26 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import EventCard, { EventType } from '../components/events/EventCard';
+import { db } from '../firebase';
+import { collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { initializeFirestoreData } from '../utils/dbInit';
 
-// Mock data for featured events
-const MOCK_EVENTS: EventType[] = [
-  {
-    id: '1',
-    title: 'Annual Tech Conference',
-    description: 'Join us for a day of tech talks, workshops, and networking with industry professionals.',
-    date: '2025-04-15',
-    time: '10:00 AM - 4:00 PM',
-    location: 'Main Auditorium',
-    organizerId: 'org1',
-    organizerName: 'Computer Science Club',
-    category: 'Technology',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-  },
-  {
-    id: '2',
-    title: 'Spring Music Festival',
-    description: 'A celebration of music featuring performances by student bands and local artists.',
-    date: '2025-05-10',
-    time: '5:00 PM - 10:00 PM',
-    location: 'Campus Quad',
-    organizerId: 'org2',
-    organizerName: 'Music Association',
-    category: 'Music',
-    image: 'https://images.unsplash.com/photo-1501612780327-45045538702b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-  },
-  {
-    id: '3',
-    title: 'Career Fair',
-    description: 'Meet with recruiters from top companies looking to hire for internships and full-time positions.',
-    date: '2025-04-20',
-    time: '12:00 PM - 5:00 PM',
-    location: 'Student Center',
-    organizerId: 'org3',
-    organizerName: 'Career Services',
-    category: 'Career',
-    image: 'https://images.unsplash.com/photo-1560523159-4a9692d222ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-  },
-];
-
-// Stats for campus life
-const CAMPUS_STATS = [
-  { label: 'Events This Year', value: '350+' },
-  { label: 'Student Clubs', value: '120+' },
-  { label: 'Departments', value: '40+' },
-  { label: 'Active Users', value: '8,000+' },
-];
+interface CampusStat {
+  label: string;
+  value: string;
+}
 
 export default function HomePage() {
   const [featuredEvents, setFeaturedEvents] = useState<EventType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [animateStats, setAnimateStats] = useState(false);
+  const [campusStats, setCampusStats] = useState<CampusStat[]>([
+    { label: 'Events This Year', value: '50' },
+    { label: 'Student Clubs', value: '5' },
+    { label: 'Departments', value: '1' },
+    { label: 'Active Users', value: '10' },
+  ]);
+  const [initializingData, setInitializingData] = useState(false);
 
   // Animate stats when visible in viewport
   useEffect(() => {
@@ -73,15 +40,71 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  // Fetch campus stats from Firestore
   useEffect(() => {
-    // Simulate loading data from API
+    const fetchCampusStats = async () => {
+      try {
+        const statsDocRef = doc(db, 'stats', 'campus');
+        const statsDoc = await getDoc(statsDocRef);
+        
+        if (statsDoc.exists()) {
+          const statsData = statsDoc.data();
+          const formattedStats: CampusStat[] = [
+            { label: 'Events This Year', value: `${statsData.eventsCount}+` },
+            { label: 'Student Clubs', value: `${statsData.clubsCount}+` },
+            { label: 'Departments', value: `${statsData.departmentsCount}+` },
+            { label: 'Active Users', value: `${statsData.usersCount.toLocaleString()}+` },
+          ];
+          setCampusStats(formattedStats);
+        }
+      } catch (error) {
+        console.error('Error fetching campus stats:', error);
+      }
+    };
+
+    fetchCampusStats();
+  }, []);
+
+  useEffect(() => {
+    // Fetch events from Firestore
     const fetchEvents = async () => {
       setIsLoading(true);
-      // In a real app, this would be an API call
-      setTimeout(() => {
-        setFeaturedEvents(MOCK_EVENTS);
+      try {
+        const eventsQuery = query(
+          collection(db, 'events'),
+          orderBy('date', 'asc'),
+          limit(3)
+        );
+        
+        const querySnapshot = await getDocs(eventsQuery);
+        const eventsData: EventType[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const eventData = doc.data();
+          eventsData.push({
+            id: doc.id,
+            title: eventData.title,
+            description: eventData.description,
+            date: eventData.date,
+            time: eventData.time,
+            location: eventData.location,
+            organizerId: eventData.organizerId,
+            organizerName: eventData.organizerName,
+            category: eventData.category,
+            imageUrl: eventData.imageUrl,
+            isBookmarked: false,
+            isRegistered: false
+          });
+        });
+        
+        setFeaturedEvents(eventsData);
+      } catch (error) {
+        console.error('Error fetching events from Firestore:', error);
+        // Fallback to empty array
+        setFeaturedEvents([]);
+      } finally {
         setIsLoading(false);
-      }, 500);
+      }
     };
 
     fetchEvents();
@@ -95,6 +118,22 @@ export default function HomePage() {
           : event
       )
     );
+  };
+
+  // Function to handle data initialization
+  const handleInitializeData = async () => {
+    if (initializingData) return;
+    
+    setInitializingData(true);
+    try {
+      await initializeFirestoreData();
+      // Refresh data after initialization
+      window.location.reload();
+    } catch (error) {
+      console.error('Error initializing data:', error);
+    } finally {
+      setInitializingData(false);
+    }
   };
 
   return (
@@ -143,7 +182,7 @@ export default function HomePage() {
       <section className="py-16 bg-white" id="stats-section">
         <div className="max-w-screen-xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12">
-            {CAMPUS_STATS.map((stat, index) => (
+            {campusStats.map((stat, index) => (
               <div key={index} className="text-center transform transition-all duration-700 ease-out" 
                    style={{ 
                      opacity: animateStats ? 1 : 0, 
@@ -311,6 +350,19 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Developer tool - only shown in development mode */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            onClick={handleInitializeData}
+            disabled={initializingData}
+            className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-700 disabled:opacity-50 text-sm"
+          >
+            {initializingData ? 'Initializing...' : 'Initialize Sample Data'}
+          </button>
+        </div>
+      )}
     </Layout>
   );
 } 

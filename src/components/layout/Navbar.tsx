@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Navbar() {
-  const { currentUser, logout, userRole } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,22 +27,22 @@ export default function Navbar() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isUserMenuOpen && 
-          userMenuRef.current && 
-          userButtonRef.current && 
-          !userMenuRef.current.contains(event.target as Node) && 
-          !userButtonRef.current.contains(event.target as Node)) {
+      if (isUserMenuOpen &&
+        userMenuRef.current &&
+        userButtonRef.current &&
+        !userMenuRef.current.contains(event.target as Node) &&
+        !userButtonRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
       }
-      
-      if (isMenuOpen && 
-          mobileMenuRef.current && 
-          !mobileMenuRef.current.contains(event.target as Node) &&
-          event.target !== document.querySelector('[aria-controls="navbar-sticky"]')) {
+
+      if (isMenuOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        event.target !== document.querySelector('[aria-controls="navbar-sticky"]')) {
         setIsMenuOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isUserMenuOpen, isMenuOpen]);
@@ -75,18 +75,16 @@ export default function Navbar() {
   };
 
   return (
-    <nav 
-      className={`fixed w-full z-30 top-0 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white shadow-md' 
-          : 'bg-gradient-to-r from-primary-900 to-primary-800 text-white'
-      }`}
+    <nav
+      className={`fixed w-full z-30 top-0 transition-all duration-300 ${isScrolled
+        ? 'bg-white shadow-md'
+        : 'bg-gradient-to-r from-primary-900 to-primary-800 text-white'
+        }`}
     >
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <Link to="/" className="flex items-center z-20">
-          <span className={`self-center text-2xl font-bold whitespace-nowrap transition-colors duration-300 ${
-            isScrolled ? 'text-primary-600' : 'text-white'
-          }`}>
+          <span className={`self-center text-2xl font-bold whitespace-nowrap transition-colors duration-300 ${isScrolled ? 'text-primary-600' : 'text-white'
+            }`}>
             Campus Vibe
           </span>
         </Link>
@@ -97,11 +95,10 @@ export default function Navbar() {
               <button
                 ref={userButtonRef}
                 type="button"
-                className={`flex text-sm rounded-full focus:ring-2 focus:ring-primary-300 transition-all duration-300 ${
-                  isScrolled 
-                    ? 'bg-primary-100 text-primary-700' 
-                    : 'bg-white/20 text-white'
-                }`}
+                className={`flex text-sm rounded-full focus:ring-2 focus:ring-primary-300 transition-all duration-300 ${isScrolled
+                  ? 'bg-primary-100 text-primary-700'
+                  : 'bg-white/20 text-white'
+                  }`}
                 onClick={toggleUserMenu}
               >
                 <span className="sr-only">Open user menu</span>
@@ -109,9 +106,9 @@ export default function Navbar() {
                   {currentUser.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
               </button>
-              
+
               {isUserMenuOpen && (
-                <div 
+                <div
                   ref={userMenuRef}
                   className="absolute right-0 mt-2 w-56 py-2 bg-white rounded-lg shadow-xl z-20 border border-gray-100 animate-scaleIn"
                 >
@@ -120,9 +117,10 @@ export default function Navbar() {
                       {currentUser.email}
                     </p>
                     <p className="text-xs text-primary-600 truncate capitalize">
-                      {userRole || 'User'}
+                      {currentUser.role || 'User'}
                     </p>
                   </div>
+
                   <Link
                     to="/dashboard"
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors"
@@ -132,6 +130,28 @@ export default function Navbar() {
                     </svg>
                     Dashboard
                   </Link>
+                  {currentUser?.role === "admin" && (
+                    <Link
+                      to="/admin"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                        />
+                      </svg>
+                      Admin
+                    </Link>
+                  )}
+
                   <Link
                     to="/profile"
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors"
@@ -172,25 +192,23 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <Link 
-              to="/login" 
-              className={`font-medium rounded-lg text-sm px-5 py-2.5 transition-all duration-300 shadow-sm ${
-                isScrolled
-                  ? 'text-white bg-primary-600 hover:bg-primary-700'
-                  : 'text-primary-900 bg-white hover:bg-gray-100'
-              }`}
+            <Link
+              to="/login"
+              className={`font-medium rounded-lg text-sm px-5 py-2.5 transition-all duration-300 shadow-sm ${isScrolled
+                ? 'text-white bg-primary-600 hover:bg-primary-700'
+                : 'text-primary-900 bg-white hover:bg-gray-100'
+                }`}
             >
               Login
             </Link>
           )}
-          
+
           <button
             type="button"
-            className={`inline-flex items-center p-2 w-10 h-10 justify-center text-sm rounded-lg md:hidden focus:outline-none focus:ring-2 ml-2 transition-colors ${
-              isScrolled
-                ? 'text-gray-500 hover:bg-gray-100 focus:ring-gray-200'
-                : 'text-white hover:bg-white/20 focus:ring-white/30'
-            }`}
+            className={`inline-flex items-center p-2 w-10 h-10 justify-center text-sm rounded-lg md:hidden focus:outline-none focus:ring-2 ml-2 transition-colors ${isScrolled
+              ? 'text-gray-500 hover:bg-gray-100 focus:ring-gray-200'
+              : 'text-white hover:bg-white/20 focus:ring-white/30'
+              }`}
             aria-controls="navbar-sticky"
             aria-expanded={isMenuOpen ? 'true' : 'false'}
             onClick={toggleMenu}
@@ -207,40 +225,47 @@ export default function Navbar() {
             )}
           </button>
         </div>
-        
+
         <div
           ref={mobileMenuRef}
-          className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${
-            isMenuOpen ? 'block' : 'hidden'
-          }`}
+          className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${isMenuOpen ? 'block' : 'hidden'
+            }`}
           id="navbar-sticky"
         >
-          <ul className={`flex flex-col p-4 mt-4 font-medium rounded-lg md:flex-row md:space-x-6 md:mt-0 md:p-0 transition-colors duration-300 ${
-            isScrolled 
-              ? 'border border-gray-100 bg-gray-50 md:border-0 md:bg-transparent shadow-lg md:shadow-none' 
-              : 'bg-primary-800/95 md:bg-transparent border-0'
-          }`}>
+          <ul className={`flex flex-col p-4 mt-4 font-medium rounded-lg md:flex-row md:space-x-6 md:mt-0 md:p-0 transition-colors duration-300 ${isScrolled
+            ? 'border border-gray-100 bg-gray-50 md:border-0 md:bg-transparent shadow-lg md:shadow-none'
+            : 'bg-primary-800/95 md:bg-transparent border-0'
+            }`}>
             <li>
               <Link
                 to="/"
-                className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                  isActive('/') 
-                    ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20') 
-                    : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                } md:px-3 md:py-1.5`}
+                className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/')
+                  ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20')
+                  : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                  } md:px-3 md:py-1.5`}
                 aria-current={isActive('/') ? 'page' : undefined}
               >
                 Home
               </Link>
-            </li>
+            </li> 
+            {currentUser?.role === 'admin' && (<li>
+              <Link
+                to="/admin"
+                className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/admin')
+                  ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20')
+                  : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                  } md:px-3 md:py-1.5`}
+              >
+                Admin
+              </Link>
+            </li>)}
             <li>
               <Link
                 to="/events"
-                className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                  isActive('/events') 
-                    ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20') 
-                    : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                } md:px-3 md:py-1.5`}
+                className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/events')
+                  ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20')
+                  : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                  } md:px-3 md:py-1.5`}
               >
                 Events
               </Link>
@@ -248,11 +273,10 @@ export default function Navbar() {
             <li>
               <Link
                 to="/departments"
-                className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                  isActive('/departments') 
-                    ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20') 
-                    : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                } md:px-3 md:py-1.5`}
+                className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/departments')
+                  ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20')
+                  : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                  } md:px-3 md:py-1.5`}
               >
                 Departments
               </Link>
@@ -260,11 +284,10 @@ export default function Navbar() {
             <li>
               <Link
                 to="/clubs"
-                className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                  isActive('/clubs') 
-                    ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20') 
-                    : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                } md:px-3 md:py-1.5`}
+                className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/clubs')
+                  ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20 md:bg-white/20')
+                  : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                  } md:px-3 md:py-1.5`}
               >
                 Clubs
               </Link>
@@ -275,11 +298,10 @@ export default function Navbar() {
                 <li className="md:hidden">
                   <Link
                     to="/dashboard"
-                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                      isActive('/dashboard') 
-                        ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20') 
-                        : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                    }`}
+                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/dashboard')
+                      ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20')
+                      : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                      }`}
                   >
                     Dashboard
                   </Link>
@@ -287,11 +309,10 @@ export default function Navbar() {
                 <li className="md:hidden">
                   <Link
                     to="/profile"
-                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                      isActive('/profile') 
-                        ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20') 
-                        : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                    }`}
+                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/profile')
+                      ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20')
+                      : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                      }`}
                   >
                     Profile
                   </Link>
@@ -299,11 +320,10 @@ export default function Navbar() {
                 <li className="md:hidden">
                   <Link
                     to="/my-events"
-                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                      isActive('/my-events') 
-                        ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20') 
-                        : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                    }`}
+                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/my-events')
+                      ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20')
+                      : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                      }`}
                   >
                     My Events
                   </Link>
@@ -311,11 +331,10 @@ export default function Navbar() {
                 <li className="md:hidden">
                   <Link
                     to="/payment-history"
-                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${
-                      isActive('/payment-history') 
-                        ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20') 
-                        : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
-                    }`}
+                    className={`block py-2 px-3 rounded-md transition-all duration-200 ${isActive('/payment-history')
+                      ? (isScrolled ? 'text-primary-600 font-semibold' : 'text-white bg-white/20')
+                      : (isScrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white hover:bg-white/10')
+                      }`}
                   >
                     Payment History
                   </Link>
@@ -323,9 +342,8 @@ export default function Navbar() {
                 <li className="md:hidden mt-2 pt-2 border-t border-gray-700/30">
                   <button
                     onClick={handleLogout}
-                    className={`w-full text-left block py-2 px-3 rounded-md transition-all duration-200 ${
-                      isScrolled ? 'text-red-600 hover:bg-red-50' : 'text-red-300 hover:bg-white/10'
-                    }`}
+                    className={`w-full text-left block py-2 px-3 rounded-md transition-all duration-200 ${isScrolled ? 'text-red-600 hover:bg-red-50' : 'text-red-300 hover:bg-white/10'
+                      }`}
                   >
                     Sign out
                   </button>

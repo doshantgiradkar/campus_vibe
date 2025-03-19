@@ -35,7 +35,7 @@ export default function EventsPage() {
           location: event.location,
           organizerId: event.organizerId,
           organizerName: event.organizerName,
-          image: event.imageUrl || event.image, // Support both fields
+          imageUrl: event.imageUrl || event.image, // Support both fields
           category: event.category,
           // These would ideally come from a user events service
           isRegistered: false, // This should be set based on user registration status
@@ -228,7 +228,7 @@ export default function EventsPage() {
         </div>
 
         {/* Create event link for appropriate users */}
-        {currentUser && (
+        {currentUser?.role !== 'user' && (
           <div className="flex justify-center mb-8">
             <Link
               to="/events/create"
