@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Navbar() {
-  const { currentUser, logout, userRole } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -120,7 +120,7 @@ export default function Navbar() {
                       {currentUser.email}
                     </p>
                     <p className="text-xs text-primary-600 truncate capitalize">
-                      {userRole || 'User'}
+                      {currentUser.role || 'User'}
                     </p>
                   </div>
                   <Link
