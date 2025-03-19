@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { FieldValue, Timestamp } from 'firebase/firestore';
 
 export interface Department {
   id: string;
@@ -39,8 +39,8 @@ export interface Mentor {
   officeHours: string;
   contactInfo: string;
   yearsOfExperience: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface Event {
