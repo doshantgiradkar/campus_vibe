@@ -22,7 +22,7 @@ interface EventCardProps {
   showActions?: boolean;
 }
 
-export default function EventCard({ event, onBookmark, onRegister, showActions = true }: EventCardProps) {
+export default function EventCard({ event, onBookmark, showActions = true }: EventCardProps) {
   const formattedDate = new Date(event.date).toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',

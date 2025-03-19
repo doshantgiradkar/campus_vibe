@@ -15,6 +15,7 @@ interface RegisteredEvent extends EventType {
   price?: number;
   isPaid?: boolean;
   ticketType?: string;
+  image?: string; // Added the missing 'image' property
 }
 
 export default function RegisteredEventsPage() {
