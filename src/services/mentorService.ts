@@ -7,7 +7,6 @@ import {
   updateDoc, 
   deleteDoc, 
   serverTimestamp,
-  Timestamp,
   query,
   orderBy,
   where
@@ -85,7 +84,7 @@ export const createMentor = async (mentorData: Omit<Mentor, 'id' | 'createdAt' |
     // Create the mentor with the image URL
     const newMentor = {
       ...mentorData,
-      profileImage: imageUrl || mentorData.profileImage,
+      profileImage: imageUrl || mentorData.image,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };

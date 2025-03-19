@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function UnauthorizedPage() {
   const location = useLocation();
-  const { userRole } = useAuth();
+  const { currentUser } = useAuth();
   const requiredRole = location.state?.requiredRole || 'appropriate';
 
   return (
@@ -28,7 +28,7 @@ export default function UnauthorizedPage() {
         </p>
         
         <p className="mt-2 text-gray-500 text-center">
-          Your current role: <span className="font-medium">{userRole || 'Guest'}</span>
+          Your current role: <span className="font-medium">{currentUser?.role || 'Guest'}</span>
         </p>
         
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
