@@ -9,7 +9,7 @@ export interface EventType {
   location: string;
   organizerId: string;
   organizerName: string;
-  image?: string;
+  imageUrl?: string;
   category?: string;
   isBookmarked?: boolean;
   isRegistered?: boolean;
@@ -32,9 +32,9 @@ export default function EventCard({ event, onBookmark, onRegister, showActions =
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
       <div className="relative h-48 bg-gray-200">
-        {event.image ? (
+        {event?.imageUrl ? (
           <img 
-            src={event.image} 
+            src={event?.imageUrl} 
             alt={event.title} 
             className="w-full h-full object-cover"
           />
@@ -109,19 +109,7 @@ export default function EventCard({ event, onBookmark, onRegister, showActions =
                 Details
               </Link>
               
-              {onRegister && (
-                <button
-                  onClick={() => onRegister(event.id)}
-                  disabled={event.isRegistered}
-                  className={`text-sm font-medium rounded px-3 py-1 ${
-                    event.isRegistered
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-primary-100 text-primary-800 hover:bg-primary-200'
-                  }`}
-                >
-                  {event.isRegistered ? 'Registered' : 'Register'}
-                </button>
-              )}
+            
             </div>
           )}
         </div>

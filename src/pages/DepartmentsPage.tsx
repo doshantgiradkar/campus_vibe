@@ -131,7 +131,7 @@ export default function DepartmentsPage() {
                 <div 
                   key={department.id} 
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                  onClick={() => setSelectedDepartmentId(department.id)}
+                 
                 >
                   <div className="h-48 bg-gray-200 relative">
                     <img 
