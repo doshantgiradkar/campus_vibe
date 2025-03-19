@@ -104,7 +104,10 @@ function EventDetailsPage() {
         if (!event) return;
         
         // Register user for the event in Firestore
-        await registerUserForEvent(currentUser.id, event);
+        await registerUserForEvent(currentUser.id, event.id, {
+          eventTitle: event.title,
+          paymentStatus: 'free'
+        });
         
         // Update the event's attendee count - passing 1 to increment by 1
         await updateAttendeeCount(event.id, 1);
@@ -157,12 +160,14 @@ function EventDetailsPage() {
       
       // Create payment details
       const paymentDetails = {
-        amount: calculateFinalPrice(),
+        eventTitle: event.title,
+        paymentStatus: 'paid' as const,
+        paymentAmount: calculateFinalPrice(),
         ticketType: selectedTier?.name || 'Standard'
       };
       
       // Register user for the event in Firestore
-      await registerUserForEvent(currentUser.id, event, paymentDetails);
+      await registerUserForEvent(currentUser.id, event.id, paymentDetails);
       
       // Update the event's attendee count
       await updateAttendeeCount(event.id, 1);
@@ -422,12 +427,12 @@ function EventDetailsPage() {
                     Already Registered
                   </button>
                 ) : (
-                  <Link 
-                    to={`/events/${event.id}/register`}
+                  <button 
+                    onClick={handleRegister}
                     className="block w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white text-center rounded-lg transition-colors"
                   >
                     Register Now
-                  </Link>
+                  </button>
                 )}
                 
                 <button 

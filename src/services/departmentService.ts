@@ -7,10 +7,8 @@ import {
   updateDoc, 
   deleteDoc, 
   serverTimestamp,
-  Timestamp,
   query,
   orderBy,
-  where
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Department } from '../models/types';

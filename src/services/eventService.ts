@@ -11,8 +11,8 @@ import {
   orderBy,
   where,
   limit,
-  FieldValue,
-  increment as firestoreIncrement
+  increment as firestoreIncrement,
+  FieldValue
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Event } from '../models/types';
@@ -351,7 +351,7 @@ export const updateEvent = async (
     });
 
     const docRef = doc(eventsCollection, id);
-    await updateDoc(docRef, cleanedEventData);
+    await updateDoc(docRef, cleanedEventData as { [x: string]: FieldValue | Partial<unknown> | undefined });
   } catch (error) {
     console.error(`Error updating event with ID ${id}:`, error);
     throw error;

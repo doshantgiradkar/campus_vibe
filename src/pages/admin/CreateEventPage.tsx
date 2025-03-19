@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { Department, Club, Event } from '../../models/types'; // Adjusted the path to match the correct location
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
-import AdminSidebar from '../../components/admin/AdminSidebar';
 import { useAuth } from '../../contexts/AuthContext';
 import { createEvent } from '../../services/eventService';
 import { getAllDepartments } from '../../services/departmentService';
@@ -13,8 +13,8 @@ export default function CreateEventPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [departments, setDepartments] = useState([]);
-  const [clubs, setClubs] = useState([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
   
   // Image handling states
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +33,7 @@ export default function CreateEventPage() {
     maxAttendees: 100,
     registrationDeadline: '',
     requirements: '',
-    organizerType: 'admin',
+    organizerType: 'admin' as 'admin' | 'department' | 'club',
     organizerId: '',
     price: 0,
     // We'll handle imageUrl separately with file upload
@@ -65,7 +65,7 @@ export default function CreateEventPage() {
     }
   }, [currentUser]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
     // Handle number inputs
@@ -113,7 +113,7 @@ export default function CreateEventPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -135,12 +135,27 @@ export default function CreateEventPage() {
       const imageUrl = await uploadImageToCloudinary(eventImage, 'events');
       
       // Create event in Firestore
-      const eventData = {
-        ...formData,
-        imageUrl,
+      const eventData: Omit<Event, "id" | "createdAt" | "updatedAt"> = {
+        title: formData.title,
+        description: formData.description,
+        date: formData.date,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        location: formData.location,
+        category: formData.category,
+        maxAttendees: formData.maxAttendees,
+        registrationDeadline: formData.registrationDeadline,
+        requirements: formData.requirements,
+        organizerType: formData.organizerType,
+        organizerId: formData.organizerId,
+        price: formData.price,
+        imageUrl: imageUrl,
         status: 'published',
         attendeeCount: 0,
-        capacity: formData.maxAttendees
+        capacity: formData.maxAttendees,
+        agenda: [], // Add an empty agenda or populate it as needed
+        organizerName: currentUser?.name || 'Unknown Organizer', // Replace with actual organizer name
+        createdBy: currentUser?.id || 'Unknown Creator' // Replace with actual creator ID
       };
       
       const eventId = await createEvent(eventData);
@@ -157,7 +172,7 @@ export default function CreateEventPage() {
   return (
     <Layout>
       <div className="flex">
-        <AdminSidebar />
+        {/* <AdminSidebar /> */}
         <div className="flex-1 p-8">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New Event</h1>
